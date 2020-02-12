@@ -2,6 +2,8 @@
 
 Analytic tool to make site linkage graph.
 
+[![Build Status](https://travis-ci.org/skallet/sitelink-graph.svg?branch=master)](https://travis-ci.org/skallet/sitelink-graph)
+
 ## Usage
 
 ```
