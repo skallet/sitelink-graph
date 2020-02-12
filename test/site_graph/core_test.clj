@@ -20,7 +20,7 @@
            (:links (keep-nodes #{:google.com :facebook.com :gmail.com}
                                {:links [:yahoo.com :google.com :facebook.com]}))))))
 
-(defn mock-get [url]
+(defn mock-get [url & args]
   {:body "This is mocked html https://google.com also contains https://www.facebook.com"})
 
 (deftest xsites-pipe
