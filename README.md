@@ -4,6 +4,11 @@ Analytic tool to make site linkage graph.
 
 [![Build Status](https://travis-ci.org/skallet/sitelink-graph.svg?branch=master)](https://travis-ci.org/skallet/sitelink-graph)
 
+## Dependencies
+
+- [GraphViz](https://www.graphviz.org/)
+- [Java](https://www.java.com/en/download/)
+
 ## Usage
 
 ```
