@@ -7,7 +7,8 @@
 
 (defn fetch-site [{:keys [site] :as data}]
   (assoc data
-         :source (-> (client/get site)
+         :source (-> (client/get site {:throw-exceptions false
+                                       :ignore-unknown-host? true})
                      :body)))
 
 (def url-regex #"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&;:/~+#-]*[\w@?^=%&/~+#-])?")
@@ -45,6 +46,7 @@
                         :site-kw (->domain-kw %)))
         (filter :site-kw)
         (map fetch-site)
+        (filter :source)
         (map extract-links)))
 
 (defn xvertices-fn [nodes]

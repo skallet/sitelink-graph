@@ -15,6 +15,9 @@ Analytic tool to make site linkage graph.
 $ java -jar sitegraph.jar [filename]
 ```
 
+Filename should contains site URLs (each on own line). All sites will be fetched
+and checked for external link. Graph is build and saved as PNG file.
+
 ## Example output
 
 ![Linkage of seznam.cz sites](/preview.png)
