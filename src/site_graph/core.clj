@@ -38,10 +38,6 @@
               (filter identity)
               (into #{})))))
 
-(defn create-graph [nodes edges]
-  (uber/add-directed-edges* (apply uber/graph nodes)
-                            edges))
-
 (def xsites
   (comp (filter (complement empty?))
         (map string/trim)
@@ -60,6 +56,29 @@
         (filter (fn [[a b]]
                   (not= a b)))))
 
+(defn edge-name [e]
+  (string/join "."
+    (->> e
+         sort
+         (map name))))
+
+(defn split-edges [edges]
+  (let [grouped-edges (vals (group-by edge-name edges))]
+    {:directed (->> grouped-edges
+                    (filter #(= (count %) 1))
+                    (map first)
+                    (map #(conj % {:color :blue})))
+     :undirected (->> grouped-edges
+                      (filter #(> (count %) 1))
+                      (map first)
+                      (map #(conj % {:color :red})))}))
+
+(defn create-graph [nodes edges]
+  (let [{:keys [directed undirected]} (split-edges edges)]
+    (-> (apply uber/graph nodes)
+        (uber/add-directed-edges* directed)
+        (uber/add-edges* undirected))))
+
 (defn build-graph [source-filename]
   (let [filename (string/replace source-filename #"\.\w+$" "")
         sites (reader/transduce-file xsites conj [] source-filename)
@@ -73,7 +92,11 @@
 
 (comment
   (def g (build-graph "sites.txt"))
-  (reader/transduce-file xsites conj [] "sites.txt"))
+  (reader/transduce-file xsites conj [] "sites.txt")
+  (split-edges
+    (transduce (xvertices-fn #{:a :b :c}) conj [] [{:site-kw :a :links #{:b :c}}
+                                                   {:site-kw :b :links #{:a :c}}
+                                                   {:site-kw :c :links #{}}])))
 
 (defn -main
   "Open file and create graph, if some URLs are found."

@@ -41,3 +41,13 @@
                   :links #{:a :b}}]
           edges (transduce (xvertices-fn nodes) conj [] sites)]
       (is (= 4 (count edges))))))
+
+(deftest split-edges-test
+  (testing "Split edges into directional and undirectional"
+    (let [edges [[:a :b]
+                 [:a :c]
+                 [:b :a]
+                 [:c :b]]
+          {:keys [directed undirected]} (split-edges edges)]
+      (is (= 2 (count directed)))
+      (is (= 1 (count undirected))))))
