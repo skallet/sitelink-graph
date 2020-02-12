@@ -9,6 +9,7 @@
                  [ubergraph "0.8.2"]]
   :main ^:skip-aot site-graph.core
   :target-path "target/%s"
+  :uberjar-name "sitegraph.jar"
   :profiles
   {:uberjar {:aot :all}
    :dev

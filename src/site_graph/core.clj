@@ -12,32 +12,22 @@
 
 (def url-regex #"(http|ftp|https)://([\w_-]+(?:(?:\.[\w_-]+)+))([\w.,@?^=%&;:/~+#-]*[\w@?^=%&/~+#-])?")
 
-(defn to-host [link]
-  (let [link (string/replace link #"www\." "")]
-    (keyword (nth (first (re-seq url-regex link)) 2))))
+(defn ->domain-kw [link]
+  (when (and link (re-matches url-regex link))
+    (let [link (-> link
+                   (string/replace #"www\." "")
+                   (string/lower-case))]
+      (keyword (nth (re-find url-regex link) 2)))))
 
 (defn extract-links [{:keys [source] :as data}]
   (assoc data
          :links (into #{}
-                      (map (comp keyword
-                                 #(string/replace % #"www\." "")
-                                 string/lower-case
-                                 #(nth % 2))
+                      (map (comp ->domain-kw first)
                            (re-seq url-regex source)))))
 
-(defn link-eq [a b]
-  (= a b))
-
-(defn link-in-subset [s link]
-  (not
-    (empty?
-      (filter (partial link-eq link)
-              s))))
-
 (defn link-replace [coll link]
-  (first
-    (filter (partial link-eq link)
-            coll)))
+  (when (contains? coll link)
+    link))
 
 (defn keep-nodes [nodes data]
   (update data
@@ -54,8 +44,10 @@
 
 (def xsites
   (comp (filter (complement empty?))
-        (map #(hash-map :site (string/lower-case %)
-                        :site-kw (to-host (string/lower-case %))))
+        (map string/trim)
+        (map #(hash-map :site %
+                        :site-kw (->domain-kw %)))
+        (filter :site-kw)
         (map fetch-site)
         (map extract-links)))
 
@@ -69,20 +61,23 @@
                   (not= a b)))))
 
 (defn build-graph [source-filename]
-  (let [sites (reader/transduce-file xsites conj [] source-filename)
-        nodes (map :site-kw sites)
+  (let [filename (string/replace source-filename #"\.\w+$" "")
+        sites (reader/transduce-file xsites conj [] source-filename)
+        nodes (into #{} (map :site-kw sites))
         edges (transduce (xvertices-fn nodes) conj [] sites)
         graph (create-graph nodes edges)]
-    (uber/viz-graph graph {:save {:filename (str source-filename ".png")
-                                  :format :png}})
+    (when-not (empty? nodes)
+      (uber/viz-graph graph {:save {:filename (str filename ".png")
+                                    :format :png}}))
     graph))
 
 (comment
-  (def g (build-graph "sites"))
-  (reader/transduce-file xsites conj [] "sites"))
-
+  (def g (build-graph "sites.txt"))
+  (reader/transduce-file xsites conj [] "sites.txt"))
 
 (defn -main
-  "I don't do a whole lot ... yet."
+  "Open file and create graph, if some URLs are found."
   [& args]
-  (println "Hello, World!"))
+  (if-let [filename (first args)]
+    (build-graph filename)
+    (prn "Please specify input file")))

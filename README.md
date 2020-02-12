@@ -2,6 +2,12 @@
 
 Analytic tool to make site linkage graph.
 
+## Usage
+
+```
+$ java -jar sitegraph.jar [filename]
+```
+
 ## Example output
 
 ![Linkage of seznam.cz sites](/preview.png)

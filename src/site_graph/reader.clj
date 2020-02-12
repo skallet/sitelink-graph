@@ -4,8 +4,7 @@
 (def separator (java.io.File/separator))
 
 (defn check-file [name]
-  (let [name (str name ".txt")
-        res-filename (str "resources" separator name)]
+  (let [res-filename (str "resources" separator name)]
     (cond
       (.exists (io/file name)) name
       (.exists (io/file res-filename)) res-filename
